@@ -20,6 +20,8 @@ window.onload = function() {
 
 	let len = 4;
 	let snake = [];
+	//score 
+	let score = 4;
 	//default direction
 	let direction = "right";
 
@@ -48,8 +50,8 @@ window.onload = function() {
 
 	//create some food
 	food = {
-		x : Math.round(Math.random()*(cvsW/snakeW)+1),
-		y : Math.round(Math.random()*(cvsH/snakeH)+1)
+		x : Math.round(Math.random()*(cvsW/snakeW-1)),
+		y : Math.round(Math.random()*(cvsH/snakeH-1))
 	};
 
 	//draw food
@@ -61,11 +63,27 @@ window.onload = function() {
 		ctx.strokeRect(x* snakeW, y* snakeH, snakeW, snakeH);
 	}
 
+	//check collision of snake with itself
+	let checkCollision = (x,y,array) => {
+		for(let i = 1; i < array.length; i++){
+			if( x==array[i].x && y==array[i].y ){
+				return true;
+			}
+		}
+		return false;
+	}
+
+	let drawScore = (score) => {
+		ctx.fillStyle = "green";
+		ctx.font = "15px Verdana";
+		ctx.fillText("score: "+score,5,cvsH-5);
+
+	}
 
 	function draw(){
 		ctx.clearRect(0,0,cvsW,cvsH);
 		
-		for(let i=0;i<snake.length;i++){
+		for(let i=snake.length-1;i>=0;i--){
 			let x = snake[i].x;
 			let y = snake[i].y;
 			drawSnake(x,y);
@@ -76,13 +94,24 @@ window.onload = function() {
 		let snakeX = snake[0].x;
 		let snakeY = snake[0].y;
 
-		//snake hits the wall then end the game
-		if(snakeX<0 || snakeY < 0  || snakeX>=cvsW/snakeW || snakeY>=cvsH/snakeH){
+		//snake hits the wall or itself then end the game
+		if(snakeX<0 || snakeY < 0  || snakeX>=cvsW/snakeW || snakeY>=cvsH/snakeH || checkCollision(snakeX,snakeY,snake)){
 			location.reload();
 		}
 
-		//removing tail;
-		snake.pop();
+		//if snake eats food;
+		if(snakeX === food.x && snakeY=== food.y){
+			food = {
+				x : Math.round(Math.random()*(cvsW/snakeW-1)),
+				y : Math.round(Math.random()*(cvsH/snakeH-1))
+			};
+			score++;
+		}else{			
+			//removing tail;
+			snake.pop();
+		}
+
+
 
 		//creating new HEAD of the snake, based on previous head and direction
 		if(direction==="left") snakeX--;
@@ -96,7 +125,7 @@ window.onload = function() {
 		};
 
 		snake.unshift(newHead);
-
+		drawScore(score);
 
 
 	}
